@@ -153,22 +153,22 @@ captureBtn.addEventListener("click", async () => {
     // Add overlay
     const overlayHeight = canvas.width/5;
     context.fillStyle = "rgba(0, 0, 0, 0.5)";
-    context.fillRect(canvas.width / 4, canvas.height - overlayHeight, (canvas.width / 4) * 3, overlayHeight);
-    context.fillRect(canvas.width - canvas.width / 4 - 130, canvas.height - overlayHeight - 25, 130 , 25);
+    context.fillRect(canvas.width / 8, canvas.height - overlayHeight, (canvas.width / 4) * 3, overlayHeight);
+    // context.fillRect(canvas.width - canvas.width / 4 - 130, canvas.height - overlayHeight - 25, 130 , 25);
 
     // Draw map
-    const mapSize = overlayHeight - 20;
+    const mapSize = overlayHeight - 30;
     const mapX = (canvas.width / 4) + 10;
     const mapY = canvas.height - overlayHeight + 15;
     context.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
 
     // Add text
     context.fillStyle = "white";
-    context.font = "18 px sans-serif";
+    context.font = "24px sans-serif";
 
-    const textX = (canvas.width / 4) + 140;
+    const textX = (canvas.width / 4) + (mapSize + 20);
     let textY = canvas.height - overlayHeight + 35;
-    const lineHeight = 25;
+    const lineHeight = 30;
 
     // Draw location info
     context.fillText(`${addressDetails.city}, ${addressDetails.state}, ${addressDetails.country}`, textX, textY);
