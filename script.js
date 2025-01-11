@@ -151,7 +151,7 @@ captureBtn.addEventListener("click", async () => {
     context.drawImage(video, 0, 0);
 
     // Add overlay
-    const overlayHeight = 150;
+    const overlayHeight = canvas.width/5;
     context.fillStyle = "rgba(0, 0, 0, 0.5)";
     context.fillRect(canvas.width / 4, canvas.height - overlayHeight, (canvas.width / 4) * 2, overlayHeight);
     context.fillRect(canvas.width - canvas.width / 4 - 130, canvas.height - overlayHeight - 25, 130 , 25);
