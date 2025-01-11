@@ -158,15 +158,15 @@ captureBtn.addEventListener("click", async () => {
 
     // Draw map
     const mapSize = overlayHeight - 30;
-    const mapX = (canvas.width / 4) + 10;
+    const mapX = (canvas.width / 8) + 10;
     const mapY = canvas.height - overlayHeight + 15;
     context.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
 
     // Add text
     context.fillStyle = "white";
-    context.font = "24px sans-serif";
+    context.font = "120px sans-serif";
 
-    const textX = (canvas.width / 4) + (mapSize + 20);
+    const textX = (canvas.width / 8) + (mapSize + 20);
     let textY = canvas.height - overlayHeight + 35;
     const lineHeight = 30;
 
