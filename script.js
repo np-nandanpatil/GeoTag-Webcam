@@ -26,8 +26,8 @@ async function initCamera() {
         const constraints = {
             video: {
                 deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
-                width: 4096, // 4K
-                height: 3072, // 4K
+                width: 3072, // 4K
+                height: 4096, // 4K
                 facingMode: backCamera ? undefined : "environment",
             },
         };
@@ -164,11 +164,11 @@ captureBtn.addEventListener("click", async () => {
 
     // Add text
     context.fillStyle = "white";
-    context.font = "120px sans-serif";
+    context.font = `${(overlayHeight/7)}px sans-serif`;
 
     const textX = (canvas.width / 8) + (mapSize + 20);
     let textY = canvas.height - overlayHeight + 35;
-    const lineHeight = 30;
+    const lineHeight = overlayHeight/5;
 
     // Draw location info
     context.fillText(`${addressDetails.city}, ${addressDetails.state}, ${addressDetails.country}`, textX, textY);
@@ -202,7 +202,7 @@ captureBtn.addEventListener("click", async () => {
     context.fillText(`${timeString} ${offsetString}`, textX, textY);
 
     // GeoTag Webcam text
-    context.font = "18 px Arial";
+    // context.font = "18 px Arial";
     context.fillText("GeoTag Webcam", canvas.width - canvas.width / 4 - 120, canvas.height - overlayHeight - 5);
 
     // Create and display captured photo
