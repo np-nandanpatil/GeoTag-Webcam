@@ -26,8 +26,8 @@ async function initCamera() {
         const constraints = {
             video: {
                 deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
-                width: 3072, // 4K
-                height: 4096, // 4K
+                width: {ideal: 3072}, // 4K
+                height: {ideal: 4096}, // 4K
                 facingMode: backCamera ? undefined : "environment",
             },
         };
@@ -151,7 +151,7 @@ captureBtn.addEventListener("click", async () => {
     context.drawImage(video, 0, 0);
 
     // Add overlay
-    const overlayHeight = canvas.height/6;
+    const overlayHeight = canvas.height/8;
     context.fillStyle = "rgba(0, 0, 0, 0.5)";
     context.fillRect(canvas.width / 8, canvas.height - overlayHeight, (canvas.width / 4) * 3, overlayHeight);
     // context.fillRect(canvas.width - canvas.width / 4 - 130, canvas.height - overlayHeight - 25, 130 , 25);
