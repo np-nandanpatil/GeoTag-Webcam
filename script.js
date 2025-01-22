@@ -26,8 +26,8 @@ async function initCamera() {
         const constraints = {
             video: {
                 deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
-                width: 3072, /*{ideal: 3072},*/ // 4K
-                height: 4096, /* {ideal: 4096},*/ // 4K
+                width: 4096, /*{ideal: 3072},*/ // 4K
+                height: 3072, /* {ideal: 4096},*/ // 4K
                 facingMode: backCamera ? undefined : "environment",
             },
         };
