@@ -167,7 +167,7 @@ captureBtn.addEventListener("click", async () => {
     context.font = `${(overlayHeight/7)}px sans-serif`;
 
     const textX = (canvas.width / 8) + (mapSize + 20);
-    let textY = canvas.height - overlayHeight;
+    let textY = canvas.height - overlayHeight + (overlayHeight/5);
     const lineHeight = overlayHeight/5;
 
     // Draw location info
