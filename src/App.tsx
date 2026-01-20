@@ -99,9 +99,12 @@ function App() {
             const offsetString = `GMT${offset >= 0 ? "+" : "-"}${offsetHours}`;
             const dateLine = `${timeString} • ${offsetString}`;
 
+            // Prepare Address (Handle null fallback)
+            const safeAddr = address || { city: "Unknown City", state: "", postal: "", country: "" };
+
             const lines = [
-                `${address.city}, ${address.state}`,
-                `${address.postal}, ${address.country}`,
+                `${safeAddr.city}, ${safeAddr.state}`,
+                `${safeAddr.postal}, ${safeAddr.country}`,
                 `Lat ${latitude.toFixed(5)}°  Long ${longitude.toFixed(5)}°`,
                 dateLine
             ];
@@ -193,7 +196,7 @@ function App() {
                         )}
 
                         <button
-                            className="shutter-btn"
+                            className={`shutter-btn ${capturing ? 'capturing' : ''}`}
                             onClick={handleCapture}
                         // disabled={!camReady || !address || capturing} // DEBUG: Always enabled
                         />
