@@ -1,43 +1,19 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
 
 <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <meta charset="UTF-8" />
+     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+     <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
      <title>GeoTag Webcam</title>
-     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap">
-     <link rel="stylesheet" href="style.css">
+     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
      <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
 </head>
 
 <body>
-     <h1>GeoTag Webcam</h1>
-
-     <div class="main-container">
-          <div id="error" class="status-message status-error"></div>
-          <div id="info" class="status-message status-info"></div>
-
-          <div class="camera-container">
-               <video id="video" autoplay playsinline></video>
-          </div>
-
-          <div class="controls">
-               <button id="capture-btn" class="btn btn-primary" disabled>Capture 📸</button>
-               <button id="retry-loc-btn" class="btn btn-primary"
-                    style="display: none; background-color: var(--text-muted);">Retry Location 📍</button>
-          </div>
-     </div>
-
-     <div id="photo-container" class="result-container"></div>
-
-     <canvas id="canvas" class="hidden"></canvas>
-     <div id="map"></div>
-
-     <!-- Leaflet JS and html2canvas -->
-     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
-     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-     <script src="script.js"></script>
-
+     <div id="root"></div>
+     <script type="module" src="/src/main.tsx"></script>
 </body>
 
 </html>

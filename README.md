@@ -1,24 +1,46 @@
-# GeoTag Webcam
+# GeoTag Webcam 📸
 
-## Overview
-A web-based webcam application that geotags captured photos with location data, map overlay, and timestamp.
+A Progressive Web App (PWA) that adds geolocation overlays (Map + Address + Timestamp) to webcam photos. Built with **React**, **TypeScript**, and **Vite**.
 
-## 🚀 How to Run (Important!)
+## Features
+-   **Native App Feel**: Fullscreen immersive UI, floating controls, dark mode.
+-   **Smart Orientation**: Automatically requests High-Res Portrait (Vertical) or Landscape (Horizontal) video streams based on device rotation.
+-   **Privacy Focused**: Runs entirely in the browser. No images are uploaded to any server.
+-   **Secure**: Requires HTTPS (or `localhost`) to access Camera and Location APIs.
 
-Browsers block Camera and Location access on insecure connections (like `file://` or HTTP IP addresses). You **must** use a local server or HTTPS.
+## Tech Stack
+-   [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/)
+-   [Vite](https://vitejs.dev/) - Build tool
+-   [Leaflet](https://leafletjs.com/) - Map generation
+-   [html2canvas](https://html2canvas.hertzen.com/) - Image composition
 
-### 1. Simple Local Server (Laptop only)
-To test on your computer:
+## Development
+
+### Prerequisites
+-   Node.js (v18+)
+
+### Setup
 ```bash
-python3 -m http.server 8000
+npm install
+npm run dev
 ```
-Open [http://localhost:8000](http://localhost:8000)
 
-### 2. Mobile Testing (Requires HTTPS)
-To test on your phone, you cannot use your laptop's IP address directly (browser security will block the camera). You need a secure tunnel.
+### Mobile Testing
+To test on your mobile device during development, you must serve over HTTPS.
+1.  Start the dev server: `npm run dev`
+2.  Use `ngrok` to tunnel port 5173 (default Vite port):
+    ```bash
+    ngrok http 5173
+    ```
+3.  Open the `https://....ngrok-free.app` URL on your phone.
 
-**Using Ngrok:**
-1.  Install ngrok: `sudo snap install ngrok` (or download from ngrok.com)
-2.  Start your python server: `python3 -m http.server 8000`
-3.  In a new terminal, start tunnel: `ngrok http 8000`
-4.  Copy the `https://....ngrok.io` link and open it on your phone.
+## Build for Production
+```bash
+npm run build
+```
+The output will be in the `dist` folder.
+
+## Deployment (Cloudflare Pages)
+-   **Framework Preset**: Vite
+-   **Build Command**: `npm run build`
+-   **Output Directory**: `dist`

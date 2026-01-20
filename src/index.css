@@ -1,0 +1,244 @@
+:root {
+    --primary-color: #2563eb;
+    --error-color: #ef4444;
+    --text-white: #ffffff;
+    --backdrop: rgba(0, 0, 0, 0.85);
+}
+
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #000;
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+    /* Prevent bouncy scrolling on iOS */
+}
+
+#root {
+    width: 100%;
+    height: 100%;
+}
+
+/* Fullscreen Video */
+video#camera-feed {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    transform: translate(-50%, -50%);
+    object-fit: cover;
+}
+
+/* Hidden Elements */
+.hidden-canvas {
+    position: absolute;
+    top: -9999px;
+    left: -9999px;
+}
+
+/* UI Overlay Layer */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+}
+
+/* Status Bar */
+.status-bar {
+    padding: 40px 20px 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-pill {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+    max-width: 90%;
+}
+
+.status-pill.error {
+    background: rgba(220, 38, 38, 0.8);
+}
+
+/* Controls Bar */
+.controls-bar {
+    padding: 20px 40px 50px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    pointer-events: auto;
+}
+
+/* Buttons */
+.icon-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.shutter-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: transparent;
+    border: 4px solid white;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+}
+
+.shutter-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px;
+    height: 54px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.shutter-btn:active {
+    transform: scale(0.95);
+}
+
+.shutter-btn:active::after {
+    width: 48px;
+    height: 48px;
+    background: #ccc;
+}
+
+.shutter-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 20;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    animation: slideUp 0.3s ease;
+    padding: 20px;
+}
+
+.photo-preview {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+    margin-bottom: 20px;
+}
+
+.photo-preview img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    padding-bottom: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.spacer {
+    width: 60px;
+}
