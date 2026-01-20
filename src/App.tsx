@@ -49,9 +49,14 @@ function App() {
     const handleCapture = async () => {
         // Debugging Checks
         if (!videoRef.current) { alert("Internal Error: Video ref missing"); return; }
-        if (!camReady) { alert("Camera not ready yet. Wait a moment."); return; }
-        if (!position) { alert("Location not found yet. Check permissions."); return; }
-        if (!address) { alert("Fetching address... please wait."); return; }
+        if (!camReady) { alert("Camera not ready yet (or permission denied)."); return; }
+        if (!position) { alert("Location not found yet (GPS slow?). Check permissions."); return; }
+
+        // Soft check for address - warn but allow proceed if user insists
+        if (!address) {
+            const proceed = confirm("Address is still loading. Capture with coordinates only?");
+            if (!proceed) return;
+        }
 
         if (!canvasRef.current) return;
         setCapturing(true);
@@ -190,7 +195,7 @@ function App() {
                         <button
                             className="shutter-btn"
                             onClick={handleCapture}
-                            disabled={!camReady || !address || capturing}
+                        // disabled={!camReady || !address || capturing} // DEBUG: Always enabled
                         />
 
                         <div className="spacer"></div>
