@@ -139,8 +139,9 @@ function App() {
             const dataUrl = canvas.toDataURL("image/jpeg", 0.9);
             setCapturedImage(dataUrl);
 
-        } catch (e) {
+        } catch (e: any) {
             console.error("Capture failed", e);
+            alert("Capture Error: " + (e.message || JSON.stringify(e)));
         } finally {
             setCapturing(false);
         }
