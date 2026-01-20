@@ -66,11 +66,19 @@ export const useCamera = () => {
     // Orientation Listener
     useEffect(() => {
         let resizeTimer: any;
+        let lastIsPortrait = window.innerHeight > window.innerWidth;
+
         const handleResize = () => {
             clearTimeout(resizeTimer);
             resizeTimer = setTimeout(() => {
-                console.log("Resize detected, restarting camera...");
-                initCamera();
+                const currentIsPortrait = window.innerHeight > window.innerWidth;
+                // Only restart if the orientation actually flipped (e.g. 90deg rotation)
+                // Small pixel changes (URL bar) should NOT trigger this.
+                if (currentIsPortrait !== lastIsPortrait) {
+                    console.log("Orientation flip detected, restarting camera...");
+                    lastIsPortrait = currentIsPortrait;
+                    initCamera();
+                }
             }, 500);
         };
 
