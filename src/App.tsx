@@ -47,9 +47,14 @@ function App() {
     };
 
     const handleCapture = async () => {
-        if (!videoRef.current || !canvasRef.current || !position || !address) return;
-        setCapturing(true);
+        // Debugging Checks
+        if (!videoRef.current) { alert("Internal Error: Video ref missing"); return; }
+        if (!camReady) { alert("Camera not ready yet. Wait a moment."); return; }
+        if (!position) { alert("Location not found yet. Check permissions."); return; }
+        if (!address) { alert("Fetching address... please wait."); return; }
 
+        if (!canvasRef.current) return;
+        setCapturing(true);
         try {
             const { latitude, longitude } = position.coords;
             const video = videoRef.current;
