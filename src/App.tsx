@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef } from 'react';
 import { useCamera } from './hooks/useCamera';
 import { useGeoLocation } from './hooks/useGeoLocation';
 import L from 'leaflet';
@@ -20,13 +20,6 @@ function App() {
             // Create a temporary container for leafet if not existing
             if (!mapRef.current) return;
 
-            const map = L.map(document.createElement('div'), {
-                center: [lat, lon],
-                zoom: 15,
-                zoomControl: false,
-                attributionControl: false,
-                preferCanvas: true
-            });
 
             // We need to attach it to DOM briefly to render, or just use offscreen?
             // Leaflet needs DOM. Let's use the hidden ref we have.
