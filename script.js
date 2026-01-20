@@ -71,7 +71,9 @@ async function initCamera() {
         console.error("Camera Error:", err);
         let msg = "Failed to access camera.";
         if (err.name === 'NotAllowedError') msg = "Camera permission denied.";
+        if (err.name === 'NotAllowedError') msg = "Camera permission denied.";
         errorMsg.textContent = msg;
+        errorMsg.classList.remove("hidden");
     }
 }
 
@@ -126,6 +128,7 @@ async function getLoc() {
         return;
     }
 
+    infoMsg.classList.remove("hidden");
     infoMsg.textContent = "Requesting location...";
 
     navigator.geolocation.getCurrentPosition(
@@ -136,8 +139,10 @@ async function getLoc() {
             try {
                 addressDetails = await getAddressFromCoords(latitude, longitude);
                 infoMsg.textContent = "Location acquired 👍🏻";
+                setTimeout(() => infoMsg.classList.add("hidden"), 3000); // Auto hide after 3s
             } catch (e) {
                 infoMsg.textContent = "Location acquired (Address failed)";
+                setTimeout(() => infoMsg.classList.add("hidden"), 3000);
             }
         },
         (err) => {
@@ -148,6 +153,7 @@ async function getLoc() {
             else if (err.code === 3) msg = "Timeout.";
 
             errorMsg.textContent = msg;
+            errorMsg.classList.remove("hidden"); // Show pill
             if (retryLocBtn) retryLocBtn.style.display = "inline-flex";
         },
         { enableHighAccuracy: true, timeout: 20000, maximumAge: 10000 }
@@ -159,11 +165,53 @@ if (retryLocBtn) {
     retryLocBtn.addEventListener("click", getLoc);
 }
 
+// --- UI Helpers ---
+const resultModal = document.getElementById("result-modal");
+const retakeBtn = document.getElementById("retake-btn");
+const downloadWrapper = document.getElementById("download-wrapper");
+
+function showModal(imgCanvas, now) {
+    const img = document.createElement("img");
+    img.src = imgCanvas.toDataURL("image/jpeg", 0.9);
+    img.alt = "Captured photo";
+
+    // Clear previous
+    photoContainer.innerHTML = "";
+    downloadWrapper.innerHTML = "";
+
+    // Add Image
+    photoContainer.appendChild(img);
+
+    // Add Download Button
+    const downloadBtn = document.createElement("a");
+    downloadBtn.href = imgCanvas.toDataURL("image/jpeg", 0.9);
+    downloadBtn.download = `geotag_${now.toISOString().slice(0, 19).replace(/:/g, "-")}.jpg`;
+    downloadBtn.textContent = "Save Photo";
+    downloadBtn.className = "btn btn-primary";
+    downloadWrapper.appendChild(downloadBtn);
+
+    // Show Modal
+    resultModal.classList.remove("hidden");
+}
+
+retakeBtn.addEventListener("click", () => {
+    resultModal.classList.add("hidden");
+    // clear memory if needed
+    photoContainer.innerHTML = "";
+});
+
+
 captureBtn.addEventListener("click", async () => {
     if (!curPos || !addressDetails) {
+        errorMsg.classList.remove("hidden");
         errorMsg.textContent = "Wait for location data!";
+        setTimeout(() => errorMsg.classList.add("hidden"), 3000); // Auto hide error pill
         return;
     }
+
+    // Indicate capture start
+    captureBtn.disabled = true;
+    captureBtn.classList.add("capturing");
 
     const { latitude, longitude } = curPos.coords;
     const mapCanvas = await createStaticMap(latitude, longitude);
@@ -176,7 +224,7 @@ captureBtn.addEventListener("click", async () => {
     context.drawImage(video, 0, 0);
 
     // --- Dynamic Scaling & Layout ---
-    const refSize = 3840; // Reference width (4K) to scale against
+    const refSize = 3840;
     const currentMaxDim = Math.max(canvas.width, canvas.height);
     const scale = currentMaxDim / refSize;
 
@@ -186,7 +234,7 @@ captureBtn.addEventListener("click", async () => {
     const mapSize = 250 * scale;
     const fontSize = 40 * scale;
     const lineHeight = 55 * scale;
-    const gap = 40 * scale; // Gap between map and text
+    const gap = 40 * scale;
 
     // Prepare Text Content
     const now = new Date();
@@ -206,7 +254,7 @@ captureBtn.addEventListener("click", async () => {
         dateLine
     ];
 
-    // Measure Text Width to center the group
+    // Measure Text Width
     context.font = `${Math.round(fontSize)}px 'Inter', sans-serif`;
     let maxTextWidth = 0;
     lines.forEach(line => {
@@ -214,12 +262,7 @@ captureBtn.addEventListener("click", async () => {
         if (metrics.width > maxTextWidth) maxTextWidth = metrics.width;
     });
 
-    // Calculate Content Group Dimensions
-    // Group = [Map] [Gap] [Text Block]
-    // Note: If width is small (portrait phone view), might need to adjust, but scaling should handle it.
     const contentWidth = mapSize + gap + maxTextWidth;
-
-    // Calculate Starting X to center the group
     const startX = (canvas.width - contentWidth) / 2;
     const mapX = startX;
     const textX = mapX + mapSize + gap;
@@ -234,41 +277,25 @@ captureBtn.addEventListener("click", async () => {
 
     // Draw Text
     context.textBaseline = "middle";
-
-    // Center text vertical block relative to map/overlay
     const totalTextHeight = lines.length * lineHeight;
-    // Start drawing so the block is centered vertically in the overlay
     let textStartY = canvas.height - overlayHeight + ((overlayHeight - totalTextHeight) / 2) + (lineHeight / 2);
 
     lines.forEach((line, index) => {
-        // Style last line differently (Date)
         if (index === 3) context.fillStyle = "#e2e8f0";
         else context.fillStyle = "white";
-
         context.fillText(line, textX, textStartY + (index * lineHeight));
     });
 
-    // Branding (Bottom Right)
+    // Branding
     context.font = `bold ${Math.round(fontSize * 0.8)}px Arial`;
     context.fillStyle = "rgba(255, 255, 255, 0.6)";
     context.textAlign = "right";
     context.fillText("GeoTag Webcam", canvas.width - (20 * scale), canvas.height - (20 * scale));
-    context.textAlign = "left"; // Reset
+    context.textAlign = "left";
 
-    // Finalize
-    const img = document.createElement("img");
-    img.src = canvas.toDataURL("image/jpeg", 0.9);
-    img.alt = "Captured photo";
-
-    const downloadBtn = document.createElement("a");
-    downloadBtn.href = canvas.toDataURL("image/jpeg", 0.9);
-    downloadBtn.download = `geotag_${now.toISOString().slice(0, 19).replace(/:/g, "-")}.jpg`;
-    downloadBtn.textContent = "Download Photo";
-    downloadBtn.className = "btn btn-primary";
-
-    photoContainer.innerHTML = "";
-    photoContainer.appendChild(img);
-    photoContainer.appendChild(downloadBtn);
+    // Show result
+    showModal(canvas, now);
+    captureBtn.disabled = false;
 });
 
 // Start
@@ -280,7 +307,6 @@ let resizeTimer;
 window.addEventListener("resize", () => {
     clearTimeout(resizeTimer);
     resizeTimer = setTimeout(() => {
-        // Debounce to allow rotation animation to complete
         console.log("Resize/Orientation detected. Refetching camera stream...");
         initCamera();
     }, 500);

@@ -1,164 +1,267 @@
 :root {
     --primary-color: #2563eb;
-    --primary-hover: #1d4ed8;
-    --bg-color: #f8fafc;
-    --card-bg: #ffffff;
-    --text-main: #1e293b;
-    --text-muted: #64748b;
     --error-color: #ef4444;
-    --success-color: #10b981;
-    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
-    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-    --radius: 0.75rem;
+    --text-white: #ffffff;
+    --backdrop: rgba(0, 0, 0, 0.85);
 }
 
 * {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
-    background-color: var(--bg-color);
-    color: var(--text-main);
-    line-height: 1.5;
-    padding: 2rem;
-    min-height: 100vh;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-}
-
-h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: var(--text-main);
-    margin-bottom: 2rem;
-    text-align: center;
-}
-
-.main-container {
-    background: var(--card-bg);
-    padding: 2rem;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    width: 100%;
-    max-width: 800px;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
-}
-
-.camera-container {
-    position: relative;
-    width: 100%;
-    border-radius: var(--radius);
+    background-color: #000;
+    height: 100vh;
+    width: 100vw;
     overflow: hidden;
-    background: #000;
-    /* aspect-ratio removed to allow fluid video dimensions */
-    display: flex;
-    /* Centers the video if it has different aspect ratio */
-    justify-content: center;
-    align-items: center;
+    position: fixed;
+    /* Prevent bouncy scrolling on iOS */
 }
 
-video {
-    width: 100%;
-    height: 100%;
+/* Fullscreen Video */
+#video {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    min-width: 100%;
+    min-height: 100%;
+    width: auto;
+    height: auto;
+    z-index: 1;
+    transform: translate(-50%, -50%);
     object-fit: cover;
-    display: block;
 }
 
-.controls {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-}
-
-.btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    padding: 0.75rem 1.5rem;
-    font-weight: 600;
-    border-radius: 9999px;
-    border: none;
-    cursor: pointer;
-    transition: all 0.2s;
-    font-size: 1rem;
-    text-decoration: none;
-    gap: 0.5rem;
-}
-
-.btn-primary {
-    background-color: var(--primary-color);
-    color: white;
-}
-
-.btn-primary:hover:not(:disabled) {
-    background-color: var(--primary-hover);
-    transform: translateY(-1px);
-}
-
-.btn-primary:disabled {
-    background-color: var(--text-muted);
-    cursor: not-allowed;
-    opacity: 0.7;
-}
-
-.status-message {
-    padding: 0.75rem;
-    border-radius: var(--radius);
-    font-size: 0.875rem;
-    text-align: center;
-    width: 100%;
-    display: none;
-    /* Hidden by default */
-}
-
-.status-message:not(:empty) {
-    display: block;
-}
-
-.status-error {
-    background-color: #fef2f2;
-    color: var(--error-color);
-    border: 1px solid #fee2e2;
-}
-
-.status-info {
-    background-color: #eff6ff;
-    color: var(--primary-color);
-    border: 1px solid #dbeafe;
-}
-
-.result-container {
-    margin-top: 2rem;
-    text-align: center;
-    width: 100%;
-    max-width: 800px;
-}
-
-.result-container img {
-    max-width: 100%;
-    border-radius: var(--radius);
-    box-shadow: var(--shadow-md);
-    margin-bottom: 1rem;
-}
-
-/* Utilities */
-.hidden {
-    display: none !important;
-}
-
+/* Hidden Elements */
+#canvas,
 #map {
-    width: 300px;
-    height: 300px;
-    /* Map is hidden visually but needs layout for capturing */
     position: absolute;
     top: -9999px;
     left: -9999px;
+    width: 300px;
+    /* Map logic needs explicit size initially */
+    height: 300px;
+}
+
+/* UI Overlay Layer */
+.ui-layer {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 10;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    pointer-events: none;
+    /* Let touches pass through to clickable elements */
+}
+
+/* Top Status Bar */
+.status-bar {
+    padding: 40px 20px 20px;
+    /* Top padding for notch/status bar */
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+}
+
+.status-pill {
+    background: rgba(0, 0, 0, 0.6);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 20px;
+    backdrop-filter: blur(8px);
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    animation: fadeIn 0.3s ease;
+    max-width: 90%;
+}
+
+.status-pill.error {
+    background: rgba(220, 38, 38, 0.8);
+}
+
+.status-pill.hidden {
+    display: none;
+}
+
+/* Bottom Controls */
+.controls-bar {
+    padding: 20px 40px 50px;
+    /* Bottom padding for home indicator */
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: linear-gradient(to top, rgba(0, 0, 0, 0.8), transparent);
+    pointer-events: auto;
+    /* Re-enable clicks */
+}
+
+/* Shutter Button */
+.shutter-btn {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: transparent;
+    border: 4px solid white;
+    position: relative;
+    cursor: pointer;
+    transition: transform 0.1s;
+    /* Center it absolutely or usually flexbox handles it */
+}
+
+.shutter-btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 54px;
+    height: 54px;
+    background: white;
+    border-radius: 50%;
+    transition: all 0.2s;
+}
+
+.shutter-btn:active {
+    transform: scale(0.95);
+}
+
+.shutter-btn:active::after {
+    width: 48px;
+    height: 48px;
+    background: #ccc;
+}
+
+.shutter-btn:disabled {
+    opacity: 0.5;
+    cursor: wait;
+}
+
+/* Aux Buttons */
+.icon-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    color: white;
+    padding: 10px 15px;
+    border-radius: 20px;
+    font-size: 14px;
+    backdrop-filter: blur(4px);
+    cursor: pointer;
+}
+
+.spacer {
+    width: 60px;
+    /* To balance the layout against the retry button */
+}
+
+/* Result Modal */
+.modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: black;
+    z-index: 20;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    animation: slideUp 0.3s ease;
+}
+
+.modal.hidden {
+    display: none;
+}
+
+.modal-content {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    padding: 20px;
+}
+
+#photo-container {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    overflow: hidden;
+}
+
+#photo-container img {
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+.modal-actions {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+    justify-content: center;
+    padding-bottom: 30px;
+}
+
+.btn {
+    padding: 12px 24px;
+    border-radius: 30px;
+    font-weight: 600;
+    font-size: 16px;
+    border: none;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.btn-secondary {
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+}
+
+.btn-primary {
+    background: var(--primary-color);
+    color: white;
+}
+
+/* Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.hidden {
+    display: none !important;
 }
