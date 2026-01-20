@@ -164,55 +164,54 @@ function App() {
     // --- Render ---
 
     // 1. Result View
-    if (capturedImage) {
-        return (
-            <div className="modal">
-                <div className="photo-preview">
-                    <img src={capturedImage} alt="Captured" />
-                </div>
-                <div className="modal-actions">
-                    <button className="btn btn-secondary" onClick={() => setCapturedImage(null)}>Retake</button>
-                    <div className="spacer"></div>
-                    <button className="btn btn-primary" onClick={downloadImage}>Save Photo</button>
-                </div>
-            </div>
-        );
-    }
-
-    // 2. Camera View
     return (
         <>
-            <video ref={videoRef} id="camera-feed" autoPlay playsInline muted />
+            <video ref={videoRef} id="camera-feed" autoPlay playsInline muted className={capturedImage ? "hidden" : ""} />
 
             {/* Hidden processing canvas */}
             <canvas ref={canvasRef} className="hidden-canvas" />
 
-            <div className="ui-layer">
-                {/* Top Status */}
-                <div className="status-bar">
-                    {camError && <div className="status-pill error">{camError}</div>}
-                    {locError && <div className="status-pill error">{locError}</div>}
-                    {!address && !locError && <div className="status-pill">Acquiring Location...</div>}
-                    {address && <div className="status-pill">Location Acquired 👍</div>}
-                </div>
+            {/* UI Layer */}
+            {!capturedImage && (
+                <div className="ui-layer">
+                    <div className="status-bar">
+                        {camError && <div className="status-pill error">{camError}</div>}
+                        {locError && <div className="status-pill error">{locError}</div>}
+                        {!address && !locError && <div className="status-pill">Acquiring Location...</div>}
+                        {address && <div className="status-pill">Location Acquired 👍</div>}
+                    </div>
 
-                {/* Bottom Controls */}
-                <div className="controls-bar">
-                    {locError ? (
-                        <button className="icon-btn" onClick={retryLoc}>📍 Retry</button>
-                    ) : (
+                    <div className="controls-bar">
+                        {locError ? (
+                            <button className="icon-btn" onClick={retryLoc}>📍 Retry</button>
+                        ) : (
+                            <div className="spacer"></div>
+                        )}
+
+                        <button
+                            className="shutter-btn"
+                            onClick={handleCapture}
+                            disabled={!camReady || !address || capturing}
+                        />
+
                         <div className="spacer"></div>
-                    )}
-
-                    <button
-                        className="shutter-btn"
-                        onClick={handleCapture}
-                        disabled={!camReady || !address || capturing}
-                    />
-
-                    <div className="spacer"></div>
+                    </div>
                 </div>
-            </div>
+            )}
+
+            {/* Result Modal */}
+            {capturedImage && (
+                <div className="modal">
+                    <div className="photo-preview">
+                        <img src={capturedImage} alt="Captured" />
+                    </div>
+                    <div className="modal-actions">
+                        <button className="btn btn-secondary" onClick={() => setCapturedImage(null)}>Retake</button>
+                        <div className="spacer"></div>
+                        <button className="btn btn-primary" onClick={downloadImage}>Save Photo</button>
+                    </div>
+                </div>
+            )}
         </>
     );
 }
