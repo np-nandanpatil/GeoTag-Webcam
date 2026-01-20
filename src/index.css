@@ -57,7 +57,7 @@ video#camera-feed.hidden {
 
 /* UI Overlay Layer */
 .ui-layer {
-    position: absolute;
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
