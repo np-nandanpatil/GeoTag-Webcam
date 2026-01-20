@@ -60,12 +60,13 @@ function App() {
 
         if (!canvasRef.current) return;
         setCapturing(true);
+
         try {
             const { latitude, longitude } = position.coords;
             const video = videoRef.current;
             const canvas = canvasRef.current;
             const ctx = canvas.getContext('2d');
-            if (!ctx) return;
+            if (!ctx) throw new Error("Could not get 2D context");
 
             // Sync dims
             canvas.width = video.videoWidth;
@@ -74,8 +75,14 @@ function App() {
             // Draw Video
             ctx.drawImage(video, 0, 0);
 
-            // Fetch Map
-            const mapCanvas = await createMapImage(latitude, longitude);
+            // Fetch Map (Resilient)
+            let mapCanvas: HTMLCanvasElement | null = null;
+            try {
+                mapCanvas = await createMapImage(latitude, longitude);
+            } catch (mapErr) {
+                console.warn("Map generation failed, skipping", mapErr);
+                // Continue without map
+            }
 
             // Draw Overlay (Logic Ported)
             const refSize = 3840;
@@ -100,11 +107,11 @@ function App() {
             const dateLine = `${timeString} • ${offsetString}`;
 
             // Prepare Address (Handle null fallback)
-            const safeAddr = address || { city: "Unknown City", state: "", postal: "", country: "" };
+            const safeAddr = address || { city: "Location", state: "Coordinates Only", postal: "", country: "" };
 
             const lines = [
-                `${safeAddr.city}, ${safeAddr.state}`,
-                `${safeAddr.postal}, ${safeAddr.country}`,
+                `${safeAddr.city}, ${safeAddr.state}`.replace(/^, /, '').replace(/, $/, ''),
+                `${safeAddr.postal}, ${safeAddr.country}`.replace(/^, /, '').replace(/, $/, ''),
                 `Lat ${latitude.toFixed(5)}°  Long ${longitude.toFixed(5)}°`,
                 dateLine
             ];
@@ -119,19 +126,29 @@ function App() {
 
             // Layout
             const contentWidth = mapSize + gap + maxTextWidth;
-            const startX = (canvas.width - contentWidth) / 2;
-            const mapX = startX;
+            const mapX = (canvas.width - contentWidth) / 2;
             const textX = mapX + mapSize + gap;
 
             // Draw BG
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
             ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
 
-            // Draw Map
+            // Draw Map (if success)
             const mapY = canvas.height - overlayHeight + ((overlayHeight - mapSize) / 2);
-            ctx.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
+            if (mapCanvas) {
+                ctx.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
+            } else {
+                // Placeholder for failed map
+                ctx.fillStyle = "#333";
+                ctx.fillRect(mapX, mapY, mapSize, mapSize);
+                ctx.fillStyle = "#ccc";
+                ctx.font = `${Math.round(fontSize * 0.5)}px Arial`;
+                ctx.textAlign = "center";
+                ctx.fillText("Map Error", mapX + mapSize / 2, mapY + mapSize / 2);
+            }
 
             // Draw Text
+            ctx.textAlign = "left"; // Reset align
             ctx.textBaseline = "middle";
             const totalTextHeight = lines.length * lineHeight;
             let textStartY = canvas.height - overlayHeight + ((overlayHeight - totalTextHeight) / 2) + (lineHeight / 2);
