@@ -26,6 +26,11 @@ if (!window.isSecureContext) {
 async function initCamera() {
     if (!window.isSecureContext) return; // Stop if not secure
 
+    // Clean up previous stream tracks if they exist
+    if (video.srcObject) {
+        video.srcObject.getTracks().forEach(track => track.stop());
+    }
+
     try {
         // Step 1: Request basic camera access
         let stream = await navigator.mediaDevices.getUserMedia({ video: true });
@@ -269,3 +274,14 @@ captureBtn.addEventListener("click", async () => {
 // Start
 setTimeout(initCamera, 500);
 setTimeout(getLoc, 1000);
+
+// Orientation/Resize Handling
+let resizeTimer;
+window.addEventListener("resize", () => {
+    clearTimeout(resizeTimer);
+    resizeTimer = setTimeout(() => {
+        // Debounce to allow rotation animation to complete
+        console.log("Resize/Orientation detected. Refetching camera stream...");
+        initCamera();
+    }, 500);
+});
