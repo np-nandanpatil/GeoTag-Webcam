@@ -41,6 +41,13 @@ video#camera-feed {
     object-fit: cover;
 }
 
+video#camera-feed.hidden {
+    visibility: hidden;
+    /* Use visibility to keep layout calculation if needed, or display:none */
+    display: none;
+    /* Safest to hide completely from view */
+}
+
 /* Hidden Elements */
 .hidden-canvas {
     position: absolute;
