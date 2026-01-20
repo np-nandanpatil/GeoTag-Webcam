@@ -22,12 +22,19 @@ if (!window.isSecureContext) {
 }
 
 // Initialize camera with a robust 2-step process
+// Initialize camera with a robust 2-step process
 async function initCamera() {
     if (!window.isSecureContext) return; // Stop if not secure
 
     try {
         // Step 1: Request basic camera access
         let stream = await navigator.mediaDevices.getUserMedia({ video: true });
+
+        // Define constraints based on orientation
+        let videoConfig = { width: { ideal: 3840 }, height: { ideal: 2160 } }; // Default Landscape
+        if (window.innerHeight > window.innerWidth) {
+            videoConfig = { width: { ideal: 2160 }, height: { ideal: 3840 } }; // Portrait
+        }
 
         // Step 2: Search for back camera
         try {
@@ -40,7 +47,10 @@ async function initCamera() {
             if (backCamera) {
                 stream.getTracks().forEach(t => t.stop());
                 stream = await navigator.mediaDevices.getUserMedia({
-                    video: { deviceId: { exact: backCamera.deviceId } }
+                    video: {
+                        deviceId: { exact: backCamera.deviceId },
+                        ...videoConfig
+                    }
                 });
             }
         } catch (e) {
@@ -157,53 +167,97 @@ captureBtn.addEventListener("click", async () => {
     canvas.height = video.videoHeight;
     const context = canvas.getContext("2d");
 
+    // Draw video frame
     context.drawImage(video, 0, 0);
 
-    const overlayHeight = 150;
-    context.fillStyle = "rgba(0, 0, 0, 0.5)";
-    context.fillRect(canvas.width / 4, canvas.height - overlayHeight, (canvas.width / 4) * 2, overlayHeight);
-    context.fillRect(canvas.width - canvas.width / 4 - 130, canvas.height - overlayHeight - 25, 130, 25);
+    // --- Dynamic Scaling & Layout ---
+    const refSize = 3840; // Reference width (4K) to scale against
+    const currentMaxDim = Math.max(canvas.width, canvas.height);
+    const scale = currentMaxDim / refSize;
 
-    const mapSize = 120;
-    const mapX = (canvas.width / 4) + 10;
-    const mapY = canvas.height - overlayHeight + 15;
-    context.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
+    // Dimensions
+    const overlayHeight = 350 * scale;
+    const padding = 40 * scale;
+    const mapSize = 250 * scale;
+    const fontSize = 40 * scale;
+    const lineHeight = 55 * scale;
+    const gap = 40 * scale; // Gap between map and text
 
-    context.fillStyle = "white";
-    context.font = "18px sans-serif";
-
-    const textX = (canvas.width / 4) + 140;
-    let textY = canvas.height - overlayHeight + 35;
-    const lineHeight = 25;
-
-    context.fillText(`${addressDetails.city}, ${addressDetails.state}, ${addressDetails.country}`, textX, textY);
-    textY += lineHeight;
-    context.fillText(`${addressDetails.postal}, ${addressDetails.country}`, textX, textY);
-    textY += lineHeight;
-    context.fillText(`Lat ${latitude.toFixed(6)}° Long ${longitude.toFixed(6)}°`, textX, textY);
-    textY += lineHeight;
-
+    // Prepare Text Content
     const now = new Date();
     const timeString = now.toLocaleString("en-US", {
-        day: "2-digit", year: "2-digit", month: "2-digit",
+        day: "2-digit", month: "short", year: "numeric",
         hour: "2-digit", minute: "2-digit", hour12: true,
     });
-
     const offset = -new Date().getTimezoneOffset();
     const offsetHours = Math.floor(Math.abs(offset) / 60);
-    const offsetString = `GMT ${offset >= 0 ? "+" : "-"}${offsetHours}`;
-    context.fillText(`${timeString} ${offsetString}`, textX, textY);
+    const offsetString = `GMT${offset >= 0 ? "+" : "-"}${offsetHours}`;
+    const dateLine = `${timeString} • ${offsetString}`;
 
-    context.font = "18px Arial";
-    context.fillText("GeoTag Webcam", canvas.width - canvas.width / 4 - 120, canvas.height - overlayHeight - 5);
+    const lines = [
+        `${addressDetails.city}, ${addressDetails.state}`,
+        `${addressDetails.postal}, ${addressDetails.country}`,
+        `Lat ${latitude.toFixed(5)}°  Long ${longitude.toFixed(5)}°`,
+        dateLine
+    ];
 
+    // Measure Text Width to center the group
+    context.font = `${Math.round(fontSize)}px 'Inter', sans-serif`;
+    let maxTextWidth = 0;
+    lines.forEach(line => {
+        const metrics = context.measureText(line);
+        if (metrics.width > maxTextWidth) maxTextWidth = metrics.width;
+    });
+
+    // Calculate Content Group Dimensions
+    // Group = [Map] [Gap] [Text Block]
+    // Note: If width is small (portrait phone view), might need to adjust, but scaling should handle it.
+    const contentWidth = mapSize + gap + maxTextWidth;
+
+    // Calculate Starting X to center the group
+    const startX = (canvas.width - contentWidth) / 2;
+    const mapX = startX;
+    const textX = mapX + mapSize + gap;
+
+    // Overlay Background
+    context.fillStyle = "rgba(0, 0, 0, 0.6)";
+    context.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
+
+    // Draw Map
+    const mapY = canvas.height - overlayHeight + ((overlayHeight - mapSize) / 2);
+    context.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
+
+    // Draw Text
+    context.textBaseline = "middle";
+
+    // Center text vertical block relative to map/overlay
+    const totalTextHeight = lines.length * lineHeight;
+    // Start drawing so the block is centered vertically in the overlay
+    let textStartY = canvas.height - overlayHeight + ((overlayHeight - totalTextHeight) / 2) + (lineHeight / 2);
+
+    lines.forEach((line, index) => {
+        // Style last line differently (Date)
+        if (index === 3) context.fillStyle = "#e2e8f0";
+        else context.fillStyle = "white";
+
+        context.fillText(line, textX, textStartY + (index * lineHeight));
+    });
+
+    // Branding (Bottom Right)
+    context.font = `bold ${Math.round(fontSize * 0.8)}px Arial`;
+    context.fillStyle = "rgba(255, 255, 255, 0.6)";
+    context.textAlign = "right";
+    context.fillText("GeoTag Webcam", canvas.width - (20 * scale), canvas.height - (20 * scale));
+    context.textAlign = "left"; // Reset
+
+    // Finalize
     const img = document.createElement("img");
-    img.src = canvas.toDataURL("image/jpeg");
+    img.src = canvas.toDataURL("image/jpeg", 0.9);
     img.alt = "Captured photo";
 
     const downloadBtn = document.createElement("a");
-    downloadBtn.href = canvas.toDataURL("image/jpeg");
-    downloadBtn.download = "geotagged_photo.jpg";
+    downloadBtn.href = canvas.toDataURL("image/jpeg", 0.9);
+    downloadBtn.download = `geotag_${now.toISOString().slice(0, 19).replace(/:/g, "-")}.jpg`;
     downloadBtn.textContent = "Download Photo";
     downloadBtn.className = "btn btn-primary";
 
