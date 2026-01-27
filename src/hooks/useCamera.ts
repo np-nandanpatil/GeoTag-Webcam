@@ -38,8 +38,8 @@ export const useCamera = () => {
             // 2. Determine constraints
             const isPortrait = window.innerHeight > window.innerWidth;
             const videoConfig = isPortrait
-                ? { width: { ideal: 2160 }, height: { ideal: 3840 } }
-                : { width: { ideal: 3840 }, height: { ideal: 2160 } };
+                ? { width: { ideal: 2160 }, height: { ideal: 3840 }, aspectRatio: 9 / 16 }
+                : { width: { ideal: 3840 }, height: { ideal: 2160 }, aspectRatio: 16 / 9 };
 
             // 3. Find back camera
             const devices = await navigator.mediaDevices.enumerateDevices();
