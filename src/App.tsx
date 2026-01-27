@@ -11,14 +11,12 @@ function App() {
     const [capturing, setCapturing] = useState(false);
 
     // Hidden elements for processing
-    const mapRef = useRef<HTMLDivElement>(null);
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
     // Helper to create static map
     const createMapImage = async (lat: number, lon: number): Promise<HTMLCanvasElement> => {
         return new Promise((resolve) => {
-            // Create a temporary container for leafet if not existing
-            if (!mapRef.current) return;
+            // Create a temporary container for leaflet
 
 
             // We need to attach it to DOM briefly to render, or just use offscreen?
