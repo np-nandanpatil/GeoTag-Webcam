@@ -34,7 +34,7 @@ video#camera-feed {
     left: 0;
     width: 100%;
     height: 100%;
-    object-fit: cover;
+    object-fit: contain;
     z-index: 1;
 }
 
@@ -120,7 +120,7 @@ video#camera-feed.hidden {
     .controls-bar {
         flex-direction: column;
         height: 100%;
-        width: 100px;
+        width: 6.25rem;
         padding: 1rem;
         background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
         justify-content: center;

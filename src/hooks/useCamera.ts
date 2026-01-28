@@ -36,12 +36,13 @@ export const useCamera = () => {
             // We'll use a more compatible height/width approach
             const isPortrait = window.innerHeight > window.innerWidth;
 
-            // Standard HD/Full HD preferences, letting the browser scale if needed
+            // 4:3 Aspect Ratio (3:4 for portrait)
+            // Let the browser choose the highest possible resolution it can support
             const videoConfig: MediaTrackConstraints = {
                 facingMode: { ideal: "environment" },
-                width: { ideal: isPortrait ? 1080 : 1920 },
-                height: { ideal: isPortrait ? 1920 : 1080 },
-                aspectRatio: isPortrait ? 9 / 16 : 16 / 9
+                aspectRatio: isPortrait ? 3 / 4 : 4 / 3,
+                width: { ideal: 4096 }, // Try to get highest possible
+                height: { ideal: 4096 }
             };
 
             const stream = await navigator.mediaDevices.getUserMedia({

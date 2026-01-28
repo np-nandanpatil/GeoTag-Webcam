@@ -26,8 +26,8 @@ function App() {
             // Actually, reusing the same div might be tricky with React.
             // Let's create a fresh map on a temporary div attached to body, then remove it.
             const tempDiv = document.createElement('div');
-            tempDiv.style.width = '300px';
-            tempDiv.style.height = '300px';
+            tempDiv.style.width = '512px';
+            tempDiv.style.height = '512px';
             tempDiv.style.position = 'absolute';
             tempDiv.style.top = '-9999px';
             document.body.appendChild(tempDiv);
