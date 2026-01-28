@@ -32,43 +32,40 @@ export const useCamera = () => {
         stopStream();
 
         try {
-            // 1. Generic request to trigger permission
-            let stream = await navigator.mediaDevices.getUserMedia({ video: true });
-
-            // 2. Determine constraints
+            // Determine constraints based on orientation
+            // We'll use a more compatible height/width approach
             const isPortrait = window.innerHeight > window.innerWidth;
-            const videoConfig = isPortrait
-                ? { width: { ideal: 2160 }, height: { ideal: 3840 }, aspectRatio: 9 / 16 }
-                : { width: { ideal: 3840 }, height: { ideal: 2160 }, aspectRatio: 16 / 9 };
 
-            // 3. Find back camera
-            const devices = await navigator.mediaDevices.enumerateDevices();
-            const backCamera = devices.find(d =>
-                d.kind === "videoinput" &&
-                (d.label.toLowerCase().includes("back") || d.label.toLowerCase().includes("environment"))
-            );
+            // Standard HD/Full HD preferences, letting the browser scale if needed
+            const videoConfig: MediaTrackConstraints = {
+                facingMode: { ideal: "environment" },
+                width: { ideal: isPortrait ? 1080 : 1920 },
+                height: { ideal: isPortrait ? 1920 : 1080 },
+                aspectRatio: isPortrait ? 9 / 16 : 16 / 9
+            };
 
-            // 4. Re-request with specific constraints
-            stream.getTracks().forEach(t => t.stop());
-            stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    deviceId: backCamera ? { exact: backCamera.deviceId } : undefined,
-                    ...videoConfig
-                }
+            const stream = await navigator.mediaDevices.getUserMedia({
+                video: videoConfig
             });
 
             if (videoRef.current) {
                 videoRef.current.srcObject = stream;
-                videoRef.current.onloadedmetadata = () => {
-                    videoRef.current?.play();
+                // Try to play immediately
+                try {
+                    await videoRef.current.play();
                     setReady(true);
-                };
+                    setError(null);
+                } catch (playErr) {
+                    console.error("Video play failed", playErr);
+                    setError("Tap to start camera");
+                }
             }
-            setError(null);
         } catch (err: any) {
             console.error("Camera Error", err);
             let msg = "Camera failed.";
             if (err.name === 'NotAllowedError') msg = "Camera permission denied.";
+            if (err.name === 'NotFoundError') msg = "No camera found.";
+            if (err.name === 'NotReadableError') msg = "Camera is already in use.";
             setError(msg);
         }
     };

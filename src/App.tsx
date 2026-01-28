@@ -8,7 +8,7 @@ import html2canvas from 'html2canvas';
 function App() {
     const { videoRef, error: camError, ready: camReady } = useCamera();
     const { position, address, error: locError, retry: retryLoc } = useGeoLocation();
-    const { orientation, isPortrait } = useOrientation();
+    const { orientation } = useOrientation();
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [capturing, setCapturing] = useState(false);
 
