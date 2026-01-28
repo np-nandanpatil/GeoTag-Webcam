@@ -84,16 +84,17 @@ function App() {
                 // Continue without map
             }
 
-            // Draw Overlay (Logic Ported)
+            // Draw Overlay (Floating Centered Stamp)
             const refSize = 3840;
             const currentMaxDim = Math.max(canvas.width, canvas.height);
             const scale = currentMaxDim / refSize;
 
-            const overlayHeight = 350 * scale;
             const mapSize = 250 * scale;
-            const fontSize = 40 * scale;
-            const lineHeight = 55 * scale;
-            const gap = 40 * scale;
+            const fontSize = 42 * scale;
+            const lineHeight = 58 * scale;
+            const gap = 50 * scale;
+            const boxPadding = 60 * scale;
+            const bottomMargin = 80 * scale;
 
             // Prepare Text
             const now = new Date();
@@ -106,9 +107,7 @@ function App() {
             const offsetString = `GMT${offset >= 0 ? "+" : "-"}${offsetHours}`;
             const dateLine = `${timeString} • ${offsetString}`;
 
-            // Prepare Address (Handle null fallback)
             const safeAddr = address || { city: "Location", state: "Coordinates Only", postal: "", country: "" };
-
             const lines = [
                 `${safeAddr.city}, ${safeAddr.state}`.replace(/^, /, '').replace(/, $/, ''),
                 `${safeAddr.postal}, ${safeAddr.country}`.replace(/^, /, '').replace(/, $/, ''),
@@ -116,7 +115,7 @@ function App() {
                 dateLine
             ];
 
-            // Measure
+            // Measure Content
             ctx.font = `${Math.round(fontSize)}px 'Inter', sans-serif`;
             let maxTextWidth = 0;
             lines.forEach(l => {
@@ -124,21 +123,36 @@ function App() {
                 if (w > maxTextWidth) maxTextWidth = w;
             });
 
-            // Layout
+            // Calculate Box Dimensions
             const contentWidth = mapSize + gap + maxTextWidth;
-            const mapX = (canvas.width - contentWidth) / 2;
-            const textX = mapX + mapSize + gap;
+            const contentHeight = Math.max(mapSize, lines.length * lineHeight);
+            const boxWidth = contentWidth + (boxPadding * 2);
+            const boxHeight = contentHeight + (boxPadding * 2);
 
-            // Draw BG
+            // Positioning (Middle-Low, Centered)
+            const boxX = (canvas.width - boxWidth) / 2;
+            const boxY = canvas.height - boxHeight - bottomMargin;
+            const contentX = boxX + boxPadding;
+            const contentY = boxY + boxPadding;
+
+            // Draw Rounded Background Box
             ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
-            ctx.fillRect(0, canvas.height - overlayHeight, canvas.width, overlayHeight);
+            ctx.beginPath();
+            const r = 24 * scale;
+            ctx.moveTo(boxX + r, boxY);
+            ctx.arcTo(boxX + boxWidth, boxY, boxX + boxWidth, boxY + boxHeight, r);
+            ctx.arcTo(boxX + boxWidth, boxY + boxHeight, boxX, boxY + boxHeight, r);
+            ctx.arcTo(boxX, boxY + boxHeight, boxX, boxY, r);
+            ctx.arcTo(boxX, boxY, boxX + boxWidth, boxY, r);
+            ctx.closePath();
+            ctx.fill();
 
-            // Draw Map (if success)
-            const mapY = canvas.height - overlayHeight + ((overlayHeight - mapSize) / 2);
+            // Draw Map
+            const mapX = contentX;
+            const mapY = contentY + (contentHeight - mapSize) / 2;
             if (mapCanvas) {
                 ctx.drawImage(mapCanvas, mapX, mapY, mapSize, mapSize);
             } else {
-                // Placeholder for failed map
                 ctx.fillStyle = "#333";
                 ctx.fillRect(mapX, mapY, mapSize, mapSize);
                 ctx.fillStyle = "#ccc";
@@ -148,21 +162,24 @@ function App() {
             }
 
             // Draw Text
-            ctx.textAlign = "left"; // Reset align
+            const textX = contentX + mapSize + gap;
+            const textStartY = contentY + (contentHeight - (lines.length * lineHeight)) / 2 + (lineHeight / 2);
+
+            ctx.textAlign = "left";
             ctx.textBaseline = "middle";
-            const totalTextHeight = lines.length * lineHeight;
-            let textStartY = canvas.height - overlayHeight + ((overlayHeight - totalTextHeight) / 2) + (lineHeight / 2);
+            ctx.font = `${Math.round(fontSize)}px 'Inter', sans-serif`;
 
             lines.forEach((line, i) => {
                 ctx.fillStyle = i === 3 ? "#e2e8f0" : "white";
                 ctx.fillText(line, textX, textStartY + (i * lineHeight));
             });
 
-            // Branding
+            // Branding (Centered at the very bottom or relative to box?)
+            // Putting it slightly below the box
             ctx.font = `bold ${Math.round(fontSize * 0.8)}px Arial`;
             ctx.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctx.textAlign = "right";
-            ctx.fillText("GeoTag Webcam", canvas.width - (20 * scale), canvas.height - (20 * scale));
+            ctx.textAlign = "center";
+            ctx.fillText("GeoTag Webcam", canvas.width / 2, canvas.height - (bottomMargin / 2));
             ctx.textAlign = "left";
 
             // Save
