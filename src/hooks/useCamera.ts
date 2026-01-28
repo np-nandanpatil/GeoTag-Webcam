@@ -41,8 +41,8 @@ export const useCamera = () => {
             const videoConfig: MediaTrackConstraints = {
                 facingMode: { ideal: "environment" },
                 aspectRatio: isPortrait ? 3 / 4 : 4 / 3,
-                width: { ideal: 4096 }, // Try to get highest possible
-                height: { ideal: 4096 }
+                width: { ideal: 1920 }, // 1080p is safer for native sensor access
+                height: { ideal: 1920 }
             };
 
             const stream = await navigator.mediaDevices.getUserMedia({

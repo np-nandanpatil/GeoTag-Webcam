@@ -15,8 +15,8 @@
 body {
     font-family: 'Inter', system-ui, -apple-system, sans-serif;
     background-color: #000;
-    height: 100vh;
-    width: 100vw;
+    height: 100dvh;
+    width: 100dvw;
     overflow: hidden;
     position: fixed;
     /* Prevent bouncy scrolling on iOS */
