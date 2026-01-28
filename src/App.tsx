@@ -1,12 +1,14 @@
 import { useState, useRef } from 'react';
 import { useCamera } from './hooks/useCamera';
 import { useGeoLocation } from './hooks/useGeoLocation';
+import { useOrientation } from './hooks/useOrientation';
 import L from 'leaflet';
 import html2canvas from 'html2canvas';
 
 function App() {
     const { videoRef, error: camError, ready: camReady } = useCamera();
     const { position, address, error: locError, retry: retryLoc } = useGeoLocation();
+    const { orientation, isPortrait } = useOrientation();
     const [capturedImage, setCapturedImage] = useState<string | null>(null);
     const [capturing, setCapturing] = useState(false);
 
@@ -195,7 +197,7 @@ function App() {
 
             {/* UI Layer */}
             {!capturedImage && (
-                <div className="ui-layer">
+                <div className={`ui-layer ${orientation}`}>
                     <div className="status-bar">
                         {camError && <div className="status-pill error">{camError}</div>}
                         {locError && <div className="status-pill error">{locError}</div>}

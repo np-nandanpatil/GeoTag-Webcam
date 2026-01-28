@@ -64,24 +64,25 @@ video#camera-feed.hidden {
     flex-direction: column;
     justify-content: space-between;
     pointer-events: none;
+    padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 
 /* Status Bar */
 .status-bar {
-    padding: 40px 20px 20px;
+    padding: 2rem 1rem 1rem;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: 10px;
+    gap: 0.6rem;
 }
 
 .status-pill {
     background: rgba(0, 0, 0, 0.6);
     color: white;
-    padding: 8px 16px;
-    border-radius: 20px;
+    padding: 0.5rem 1rem;
+    border-radius: 999px;
     backdrop-filter: blur(8px);
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 500;
     text-align: center;
     animation: fadeIn 0.3s ease;
@@ -94,7 +95,7 @@ video#camera-feed.hidden {
 
 /* Controls Bar */
 .controls-bar {
-    padding: 20px 40px 50px;
+    padding: 1.25rem 2.5rem 3rem;
     display: flex;
     justify-content: space-between;
     align-items: center;
@@ -102,27 +103,56 @@ video#camera-feed.hidden {
     pointer-events: auto;
 }
 
+/* Landscape orientation adjustments */
+@media (orientation: landscape) {
+    .ui-layer {
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .status-bar {
+        padding: 1rem;
+        height: 100%;
+        justify-content: center;
+        width: 30%;
+    }
+
+    .controls-bar {
+        flex-direction: column;
+        height: 100%;
+        width: 100px;
+        padding: 1rem;
+        background: linear-gradient(to left, rgba(0, 0, 0, 0.8), transparent);
+        justify-content: center;
+        gap: 2rem;
+    }
+
+    .spacer {
+        display: none;
+    }
+}
+
 /* Buttons */
 .icon-btn {
     background: rgba(255, 255, 255, 0.2);
     border: none;
     color: white;
-    padding: 10px 15px;
-    border-radius: 20px;
-    font-size: 14px;
+    padding: 0.6rem 1rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
     backdrop-filter: blur(4px);
     cursor: pointer;
     display: flex;
     align-items: center;
-    gap: 5px;
+    gap: 0.3rem;
 }
 
 .shutter-btn {
-    width: 72px;
-    height: 72px;
+    width: 4.5rem;
+    height: 4.5rem;
     border-radius: 50%;
     background: transparent;
-    border: 4px solid white;
+    border: 0.25rem solid white;
     position: relative;
     cursor: pointer;
     transition: transform 0.1s;
@@ -134,8 +164,8 @@ video#camera-feed.hidden {
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
-    width: 54px;
-    height: 54px;
+    width: 3.375rem;
+    height: 3.375rem;
     background: white;
     border-radius: 50%;
     transition: all 0.2s;
@@ -146,8 +176,8 @@ video#camera-feed.hidden {
 }
 
 .shutter-btn:active::after {
-    width: 48px;
-    height: 48px;
+    width: 3rem;
+    height: 3rem;
     background: #ccc;
 }
 
@@ -170,7 +200,7 @@ video#camera-feed.hidden {
     justify-content: center;
     align-items: center;
     animation: slideUp 0.3s ease;
-    padding: 20px;
+    padding: 1.25rem;
 }
 
 .photo-preview {
@@ -180,29 +210,35 @@ video#camera-feed.hidden {
     align-items: center;
     width: 100%;
     overflow: hidden;
-    margin-bottom: 20px;
+    margin-bottom: 1.25rem;
 }
 
 .photo-preview img {
     max-width: 100%;
     max-height: 80vh;
-    border-radius: 12px;
+    border-radius: 0.75rem;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+}
+
+@media (orientation: landscape) {
+    .photo-preview img {
+        max-height: 70vh;
+    }
 }
 
 .modal-actions {
     display: flex;
-    gap: 20px;
+    gap: 1.25rem;
     width: 100%;
     justify-content: center;
-    padding-bottom: 30px;
+    padding-bottom: 2rem;
 }
 
 .btn {
-    padding: 12px 24px;
-    border-radius: 30px;
+    padding: 0.75rem 1.5rem;
+    border-radius: 2rem;
     font-weight: 600;
-    font-size: 16px;
+    font-size: 1rem;
     border: none;
     cursor: pointer;
     text-decoration: none;
@@ -222,7 +258,7 @@ video#camera-feed.hidden {
 @keyframes fadeIn {
     from {
         opacity: 0;
-        transform: translateY(-10px);
+        transform: translateY(-0.625rem);
     }
 
     to {
@@ -234,7 +270,7 @@ video#camera-feed.hidden {
 @keyframes slideUp {
     from {
         opacity: 0;
-        transform: translateY(20px);
+        transform: translateY(1.25rem);
     }
 
     to {
@@ -244,5 +280,5 @@ video#camera-feed.hidden {
 }
 
 .spacer {
-    width: 60px;
+    width: 3.75rem;
 }
