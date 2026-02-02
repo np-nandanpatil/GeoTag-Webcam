@@ -2,8 +2,6 @@ import { useState, useRef } from 'react';
 import { useCamera } from './hooks/useCamera';
 import { useGeoLocation } from './hooks/useGeoLocation';
 import { useOrientation } from './hooks/useOrientation';
-import L from 'leaflet';
-import html2canvas from 'html2canvas';
 
 function App() {
     const { videoRef, error: camError, ready: camReady } = useCamera();
@@ -15,34 +13,30 @@ function App() {
     // Hidden elements for processing
     const canvasRef = useRef<HTMLCanvasElement>(null);
 
-    // Helper to create static map
+    // Helper to create static map using Google Maps
     const createMapImage = async (lat: number, lon: number): Promise<HTMLCanvasElement> => {
-        return new Promise((resolve) => {
-            // Create a temporary container for leaflet
+        return new Promise((resolve, reject) => {
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+            const mapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lon}&zoom=15&size=512x512&maptype=satellite&markers=color:red%7C${lat},${lon}&key=${apiKey}`;
 
-
-            // We need to attach it to DOM briefly to render, or just use offscreen?
-            // Leaflet needs DOM. Let's use the hidden ref we have.
-            // Actually, reusing the same div might be tricky with React.
-            // Let's create a fresh map on a temporary div attached to body, then remove it.
-            const tempDiv = document.createElement('div');
-            tempDiv.style.width = '512px';
-            tempDiv.style.height = '512px';
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.top = '-9999px';
-            document.body.appendChild(tempDiv);
-
-            const leafletMap = L.map(tempDiv).setView([lat, lon], 15);
-            L.tileLayer("https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}.png").addTo(leafletMap);
-            L.marker([lat, lon]).addTo(leafletMap);
-
-            // Wait for tiles
-            setTimeout(async () => {
-                const canvas = await html2canvas(tempDiv, { useCORS: true });
-                leafletMap.remove();
-                document.body.removeChild(tempDiv);
-                resolve(canvas);
-            }, 1500);
+            const img = new Image();
+            img.crossOrigin = "anonymous";
+            img.onload = () => {
+                const canvas = document.createElement('canvas');
+                canvas.width = 512;
+                canvas.height = 512;
+                const ctx = canvas.getContext('2d');
+                if (ctx) {
+                    ctx.drawImage(img, 0, 0);
+                    resolve(canvas);
+                } else {
+                    reject(new Error("Failed to get canvas context"));
+                }
+            };
+            img.onerror = () => {
+                reject(new Error("Failed to load map image"));
+            };
+            img.src = mapUrl;
         });
     };
 

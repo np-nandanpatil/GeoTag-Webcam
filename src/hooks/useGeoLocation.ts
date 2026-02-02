@@ -16,23 +16,32 @@ export const useGeoLocation = () => {
 
     const getAddressFromCoords = async (lat: number, lon: number) => {
         try {
+            const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
             const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json`,
-                { headers: { "Accept-Language": "en" } }
+                `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lon}&key=${apiKey}`
             );
             const data = await response.json();
 
-            if (data.address) {
+            if (data.results && data.results.length > 0) {
+                const addressComponents = data.results[0].address_components;
+
+                const getComponent = (types: string[]) => {
+                    const comp = addressComponents.find((c: any) =>
+                        types.some(t => c.types.includes(t))
+                    );
+                    return comp ? comp.long_name : "";
+                };
+
                 setAddress({
-                    city: data.address.city || data.address.town || data.address.village || "",
-                    state: data.address.state || "",
-                    country: data.address.country || "",
-                    postal: data.address.postcode || "",
-                    full: data.display_name,
+                    city: getComponent(['locality', 'administrative_area_level_2', 'sublocality']),
+                    state: getComponent(['administrative_area_level_1']),
+                    country: getComponent(['country']),
+                    postal: getComponent(['postal_code']),
+                    full: data.results[0].formatted_address,
                 });
             }
         } catch (err) {
-            console.warn("Geocoding failed", err);
+            console.warn("Google Geocoding failed", err);
             // Keep position but maybe address is null
         }
     };
